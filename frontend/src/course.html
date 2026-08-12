@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Somo - Global Learning Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold text-indigo-600 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left">Rudi Nyumbani</i>
+            </a>
+            <span class="text-sm font-semibold text-gray-600">Full-Stack Web Development</span>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Upande wa Kushoto: Video Player & Maelezo -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Video Container -->
+            <div class="bg-black rounded-2xl overflow-hidden shadow-lg aspect-video flex items-center justify-center relative">
+                <!-- Hapa unaweza kuweka iframe ya YouTube au Video Player yako -->
+                <div class="absolute inset-0 bg-cover bg-center opacity-70" style="background-image: url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1000&q=80')"></div>
+                <button class="z-10 bg-indigo-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-xl hover:scale-105 transition">
+                    <i class="fa-solid fa-play ml-1"></i>
+                </button>
+            </div>
+
+            <!-- Maelezo ya Somo -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">Somo la 1</span>
+                <h1 class="text-2xl font-bold text-gray-900 mt-3">Utangulizi wa HTML, CSS na JavaScript</h1>
+                <p class="text-gray-600 text-sm mt-3 leading-relaxed">
+                    Katika somo hili, utajifunza misingi mikuu ya kujenga kurasa za wavuti na jinsi ya kuunganisha sehemu ya mbele (frontend) na seva kuu (backend).
+                </p>
+            </div>
+        </div>
+
+        <!-- Upande wa Kulia: Orodha ya Masomo (Playlist) -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-fit space-y-4">
+            <h3 class="font-bold text-lg text-gray-900 border-b pb-3">Orodha ya Masomo (Playlist)</h3>
+            
+            <div class="space-y-2">
+                <!-- Somo 1 (Active) -->
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-indigo-50 border border-indigo-200 cursor-pointer">
+                    <i class="fa-solid fa-play text-indigo-600"></i>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-indigo-900">1. Utangulizi wa Mfumo</h4>
+                        <span class="text-xs text-gray-500">Dakika 15</span>
+                    </div>
+                </div>
+
+                <!-- Somo 2 -->
+                <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 border border-transparent cursor-pointer">
+                    <i class="fa-solid fa-lock text-gray-400"></i>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-gray-700">2. Kuandaa Enviroment & Git</h4>
+                        <span class="text-xs text-gray-500">Dakika 25</span>
+                    </div>
+                </div>
+
+                <!-- Somo 3 -->
+                <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 border border-transparent cursor-pointer">
+                    <i class="fa-solid fa-lock text-gray-400"></i>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-gray-700">3. Kuunganisha OpenRouter AI</h4>
+                        <span class="text-xs text-gray-500">Dakika 30</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>
+
