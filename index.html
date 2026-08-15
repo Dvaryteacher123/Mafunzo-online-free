@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SOLO CHAT</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="toast"></div>
+<section id="authView" class="center">
+  <div class="auth-card">
+    <div class="logo">SOLO<span>CHAT</span></div>
+    <p class="muted">Meet people. Start conversations.</p>
+    <div class="tabs"><button onclick="showAuth('login')">Login</button><button onclick="showAuth('register')">Sign Up</button></div>
+    <form id="loginForm">
+      <input id="loginIdentifier" placeholder="Email au username" required>
+      <input id="loginPassword" type="password" placeholder="Password" required>
+      <button class="primary">LOGIN</button>
+    </form>
+    <form id="registerForm" class="hidden">
+      <input id="regUsername" placeholder="Username" required>
+      <input id="regDisplay" placeholder="Display name" required>
+      <input id="regEmail" type="email" placeholder="Email" required>
+      <input id="regCountry" placeholder="Country">
+      <input id="regPassword" type="password" placeholder="Password (8+)" required>
+      <button class="primary">CREATE ACCOUNT</button>
+    </form>
+    <p class="small">Free account ipo. Premium ni optional.</p>
+  </div>
+</section>
+
+<section id="appView" class="hidden">
+  <aside>
+    <div class="logo">SOLO<span>CHAT</span></div>
+    <button onclick="tab('home')">🏠 Home</button>
+    <button onclick="tab('discover')">🔎 Discover</button>
+    <button onclick="tab('chats')">💬 Chats</button>
+    <button onclick="tab('friends')">👥 Friends</button>
+    <button onclick="tab('rooms')">🌍 Rooms</button>
+    <button onclick="tab('premium')">👑 Premium</button>
+    <button onclick="tab('settings')">⚙️ Settings</button>
+    <button onclick="logout()">🚪 Logout</button>
+  </aside>
+  <main>
+    <header><div><b id="welcomeName">SOLO CHAT</b><span id="planBadge" class="badge">FREE</span></div><button onclick="loadNotifications()">🔔 <span id="notifCount">0</span></button></header>
+    <div id="content"></div>
+  </main>
+</section>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
