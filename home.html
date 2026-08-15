@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="sw" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Chat - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-glass: rgba(255, 255, 255, 0.06);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.75);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --accent: #6c5ce7;
+            --accent-hover: #7c6cf0;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --accent-2: #00d4ff;
+            --border-glass: rgba(255, 255, 255, 0.06);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-lg: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --success: #51cf66;
+            --danger: #ff6b6b;
+            --warning: #ffd93d;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #e8eaed;
+            --bg-card: rgba(0, 0, 0, 0.03);
+            --bg-glass: rgba(0, 0, 0, 0.05);
+            --text-primary: #1a1a2e;
+            --text-secondary: rgba(0, 0, 0, 0.7);
+            --text-muted: rgba(0, 0, 0, 0.4);
+            --border-glass: rgba(0, 0, 0, 0.08);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        /* Loading */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        #loading-screen.hidden { opacity: 0; pointer-events: none; }
+        .loader {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--accent);
+            border-bottom-color: var(--accent-2);
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { margin-top: 16px; color: var(--text-secondary); font-size: 13px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.6; }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-glass);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        .sidebar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .sidebar .logo .icon {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            color: white;
+        }
+        .sidebar .logo span { font-size: 18px; font-weight: 700; }
+        .sidebar .logo span span { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        .sidebar .nav { flex: 1; }
+        .sidebar .nav .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 4px;
+            text-decoration: none;
+        }
+        .sidebar .nav .nav-item:hover, .sidebar .nav .nav-item.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        .sidebar .nav .nav-item.active { color: var(--accent); background: var(--accent-glow); }
+        .sidebar .nav .nav-item i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar .nav .nav-item .badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 50px;
+        }
+
+        .sidebar .user-info {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sidebar .user-info .avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+        }
+        .sidebar .user-info .details { flex: 1; }
+        .sidebar .user-info .details .name { font-size: 14px; font-weight: 600; }
+        .sidebar .user-info .details .status { font-size: 12px; color: var(--text-muted); }
+        .sidebar .user-info .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+        }
+        .sidebar .user-info .logout-btn:hover { color: var(--danger); }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 24px 32px;
+        }
+
+        /* Top Bar */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .topbar .left { display: flex; align-items: center; gap: 12px; }
+        .topbar .left h1 { font-size: 22px; font-weight: 700; }
+        .topbar .right { display: flex; align-items: center; gap: 12px; }
+        .topbar .right .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: 6px 12px;
+            gap: 8px;
+        }
+        .topbar .right .search-box input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            padding: 4px 0;
+            width: 160px;
+            outline: none;
+        }
+        .topbar .right .search-box input::placeholder { color: var(--text-muted); }
+        .topbar .right .search-box i { color: var(--text-muted); }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            transition: var(--transition);
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: rgba(108, 92, 231, 0.2); }
+        .stat-card .stat-icon { font-size: 22px; color: var(--accent); margin-bottom: 6px; }
+        .stat-card .stat-number { font-size: 24px; font-weight: 700; }
+        .stat-card .stat-label { font-size: 12px; color: var(--text-secondary); }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .quick-action {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .quick-action:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+        .quick-action .icon { font-size: 28px; color: var(--accent); margin-bottom: 6px; }
+        .quick-action h3 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+        .quick-action p { font-size: 12px; color: var(--text-secondary); }
+
+        /* Welcome Card */
+        .welcome-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            text-align: center;
+        }
+        .welcome-card h2 { margin-bottom: 6px; }
+        .welcome-card p { color: var(--text-secondary); font-size: 14px; }
+        .welcome-card .actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .welcome-card .actions .btn {
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 13px;
+        }
+        .welcome-card .actions .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #a29bfe);
+            color: white;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .welcome-card .actions .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px var(--accent-glow);
+        }
+        .welcome-card .actions .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-glass);
+        }
+        .welcome-card .actions .btn-outline:hover {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 16px; }
+            .topbar .right .search-box input { width: 100px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .quick-actions { grid-template-columns: 1fr 1fr; }
+            .welcome-card { padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .quick-actions { grid-template-columns: 1fr; }
+            .topbar { flex-direction: column; gap: 12px; align-items: stretch; }
+            .topbar .right .search-box { width: 100%; }
+            .topbar .right .search-box input { width: 100%; }
+            .welcome-card .actions { flex-direction: column; }
+            .welcome-card .actions .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <div class="loader-text">Loading Dashboard...</div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="icon">SC</div>
+                <span>Solo <span>Chat</span></span>
+            </div>
+
+            <nav class="nav">
+                <a href="#" class="nav-item active" onclick="goHome()">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="#" class="nav-item" onclick="goChats()">
+                    <i class="fas fa-comment-dots"></i> Chats
+                    <span class="badge" id="chatBadge">0</span>
+                </a>
+                <a href="#" class="nav-item" onclick="goFriends()">
+                    <i class="fas fa-user-friends"></i> Friends
+                </a>
+                <a href="#" class="nav-item" onclick="goRandom()">
+                    <i class="fas fa-people-arrows"></i> Random Chat
+                </a>
+                <a href="#" class="nav-item" onclick="goRooms()">
+                    <i class="fas fa-users"></i> Rooms
+                </a>
+                <a href="#" class="nav-item" onclick="goNotifications()">
+                    <i class="fas fa-bell"></i> Notifications
+                    <span class="badge" id="notifBadge">0</span>
+                </a>
+                <a href="#" class="nav-item" onclick="goProfile()">
+                    <i class="fas fa-user-cog"></i> Profile
+                </a>
+                <a href="#" class="nav-item" onclick="goSettings()">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+
+            <div class="user-info">
+                <div class="avatar" id="userAvatar">U</div>
+                <div class="details">
+                    <div class="name" id="userName">User</div>
+                    <div class="status" id="userStatus">🟢 Online</div>
+                </div>
+                <button class="logout-btn" id="logoutBtn" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="left">
+                    <button onclick="toggleSidebar()" style="background:transparent;border:none;color:var(--text-primary);font-size:20px;cursor:pointer;display:none;" id="menuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search users..." id="searchInput">
+                    </div>
+                    <button onclick="goHome()" style="background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-sm);padding:8px 14px;color:var(--text-secondary);cursor:pointer;font-size:13px;transition:var(--transition);">
+                        <i class="fas fa-home"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" id="statFriends">0</div>
+                    <div class="stat-label">Friends</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-comment-dots"></i></div>
+                    <div class="stat-number" id="statChats">0</div>
+                    <div class="stat-label">Active Chats</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-bell"></i></div>
+                    <div class="stat-number" id="statNotifications">0</div>
+                    <div class="stat-label">Notifications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-user-plus"></i></div>
+                    <div class="stat-number" id="statRequests">0</div>
+                    <div class="stat-label">Friend Requests</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <div class="quick-action" onclick="goRandom()">
+                    <div class="icon"><i class="fas fa-people-arrows"></i></div>
+                    <h3>Find Someone</h3>
+                    <p>Start a random chat</p>
+                </div>
+                <div class="quick-action" onclick="goChats()">
+                    <div class="icon"><i class="fas fa-comment-dots"></i></div>
+                    <h3>My Chats</h3>
+                    <p>View conversations</p>
+                </div>
+                <div class="quick-action" onclick="goFriends()">
+                    <div class="icon"><i class="fas fa-user-friends"></i></div>
+                    <h3>Friends</h3>
+                    <p>See who's online</p>
+                </div>
+                <div class="quick-action" onclick="goProfile()">
+                    <div class="icon"><i class="fas fa-user-cog"></i></div>
+                    <h3>Profile</h3>
+                    <p>Update your info</p>
+                </div>
+            </div>
+
+            <!-- Welcome Card -->
+            <div class="welcome-card">
+                <h2>👋 Welcome back, <span id="welcomeName">User</span>!</h2>
+                <p>Ready to connect with someone new? Click "Find Someone" to start a random chat.</p>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="goRandom()">
+                        <i class="fas fa-people-arrows"></i> Find Someone
+                    </button>
+                    <button class="btn btn-outline" onclick="goChats()">
+                        <i class="fas fa-comment-dots"></i> My Chats
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ============================================
+    JAVASCRIPT
+    ============================================ -->
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        let currentUser = null;
+        let authToken = null;
+
+        // ============================================
+        // CHECK AUTHENTICATION
+        // ============================================
+        function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('currentUser');
+
+            if (!token || !user) {
+                // No token, redirect to landing page
+                window.location.href = '/';
+                return false;
+            }
+
+            authToken = token;
+            currentUser = JSON.parse(user);
+            return true;
+        }
+
+        // ============================================
+        // LOAD USER DATA
+        // ============================================
+        async function loadUserData() {
+            try {
+                const response = await fetch(API_BASE + '/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // Token expired, logout
+                        logout();
+                        return;
+                    }
+                    throw new Error('Failed to load user data');
+                }
+
+                const data = await response.json();
+                currentUser = data.user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateUI();
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // ============================================
+        // UPDATE UI
+        // ============================================
+        function updateUI() {
+            if (!currentUser) return;
+
+            const displayName = currentUser.displayName || 'User';
+            const initial = displayName.charAt(0).toUpperCase();
+
+            document.getElementById('userName').textContent = displayName;
+            document.getElementById('userAvatar').textContent = initial;
+            document.getElementById('welcomeName').textContent = displayName;
+
+            const status = currentUser.isOnline ? '🟢 Online' : '⚫ Offline';
+            document.getElementById('userStatus').textContent = status;
+        }
+
+        // ============================================
+        // LOAD STATS
+        // ============================================
+        async function loadStats() {
+            try {
+                // Friends count
+                const friendsRes = await fetch(API_BASE + '/friends', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (friendsRes.ok) {
+                    const friends = await friendsRes.json();
+                    document.getElementById('statFriends').textContent = friends.length || 0;
+                }
+
+                // Chats count
+                const chatsRes = await fetch(API_BASE + '/chats', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (chatsRes.ok) {
+                    const chats = await chatsRes.json();
+                    document.getElementById('statChats').textContent = chats.length || 0;
+                    document.getElementById('chatBadge').textContent = chats.length || 0;
+                }
+
+                // Notifications count
+                const notifRes = await fetch(API_BASE + '/notifications?unreadOnly=true', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (notifRes.ok) {
+                    const notifs = await notifRes.json();
+                    document.getElementById('statNotifications').textContent = notifs.length || 0;
+                    document.getElementById('notifBadge').textContent = notifs.length || 0;
+                }
+
+                // Friend requests count
+                const reqRes = await fetch(API_BASE + '/friends/requests', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (reqRes.ok) {
+                    const requests = await reqRes.json();
+                    document.getElementById('statRequests').textContent = requests.length || 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // ============================================
+        // NAVIGATION FUNCTIONS
+        // ============================================
+        function goHome() {
+            showToast('🏠 Home');
+        }
+
+        function goChats() {
+            showToast('💬 Chats feature coming soon!');
+        }
+
+        function goFriends() {
+            showToast('👥 Friends feature coming soon!');
+        }
+
+        function goRandom() {
+            showToast('🔍 Finding someone to chat with...');
+        }
+
+        function goRooms() {
+            showToast('🏠 Rooms feature coming soon!');
+        }
+
+        function goNotifications() {
+            showToast('🔔 Notifications coming soon!');
+        }
+
+        function goProfile() {
+            showToast('👤 Profile settings coming soon!');
+        }
+
+        function goSettings() {
+            showToast('⚙️ Settings coming soon!');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message) {
+            const container = document.createElement('div');
+            container.style.cssText = `
+                position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                background: var(--bg-secondary); border: 1px solid var(--border-glass);
+                border-radius: var(--radius-sm); padding: 14px 20px;
+                color: var(--text-primary); font-size: 14px;
+                box-shadow: var(--shadow);
+                animation: slideUp 0.3s ease;
+                max-width: 340px;
+            `;
+            container.textContent = message;
+            document.body.appendChild(container);
+            setTimeout(() => {
+                container.style.opacity = '0';
+                setTimeout(() => container.remove(), 300);
+            }, 2500);
+        }
+
+        // ============================================
+        // LOGOUT
+        // ============================================
+        function logout() {
+            if (authToken) {
+                fetch(API_BASE + '/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                }).catch(() => {});
+            }
+
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/';
+        }
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        document.getElementById('searchInput').addEventListener('keyup', async (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (query.length < 2) return;
+
+                try {
+                    const response = await fetch(API_BASE + `/search/users?q=${encodeURIComponent(query)}`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    if (response.ok) {
+                        const results = await response.json();
+                        if (results.length > 0) {
+                            showToast(`🔍 Found ${results.length} users: ${results.map(u => u.displayName).join(', ')}`);
+                        } else {
+                            showToast('🔍 No users found');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                }
+            }
+        });
+
+        // ============================================
+        // SIDEBAR TOGGLE FOR MOBILE
+        // ============================================
+        if (window.innerWidth <= 768) {
+            document.getElementById('menuBtn').style.display = 'block';
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        (async function init() {
+            // Check authentication
+            if (!checkAuth()) return;
+
+            // Show loading
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            try {
+                // Load user data
+                await loadUserData();
+                
+                // Load stats
+                await loadStats();
+
+                // Update UI
+                updateUI();
+
+                // Hide loading
+                setTimeout(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                }, 500);
+
+                console.log('✅ Dashboard loaded successfully');
+                console.log('👤 User:', currentUser?.displayName || 'User');
+
+            } catch (error) {
+                console.error('❌ Init error:', error);
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+
+            // Auto-refresh stats every 30 seconds
+            setInterval(loadStats, 30000);
+        })();
+
+        // ============================================
+        // LOGOUT BUTTON
+        // ============================================
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // ============================================
+        // EXPOSE FUNCTIONS
+        // ============================================
+        window.toggleSidebar = toggleSidebar;
+        window.goHome = goHome;
+        window.goChats = goChats;
+        window.goFriends = goFriends;
+        window.goRandom = goRandom;
+        window.goRooms = goRooms;
+        window.goNotifications = goNotifications;
+        window.goProfile = goProfile;
+        window.goSettings = goSettings;
+        window.logout = logout;
+        window.showToast = showToast;
+
+        console.log('🚀 Solo Chat Dashboard');
+        console.log('💬 Welcome back!');
+        console.log('📱 Use the sidebar to navigate');
+    </script>
+</body>
+  </html>
