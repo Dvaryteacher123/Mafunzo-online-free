@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhoneFix Pro - Educational Platform</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ============================================
+           PREMIUM DARK + NEON GLOW + GLASSMORPHISM
+           ============================================ */
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0d0d14;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-glass: rgba(255, 255, 255, 0.06);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.75);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --accent-1: #6c5ce7;
+            --accent-2: #00d4ff;
+            --accent-3: #a29bfe;
+            --accent-glow: rgba(108, 92, 231, 0.35);
+            --cyan-glow: rgba(0, 212, 255, 0.25);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-lg: 24px;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --neon-purple: #6c5ce7;
+            --neon-cyan: #00d4ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ============================================
+           ANIMATED BACKGROUND - AURORA/LIGHT WAVES
+           ============================================ */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 30% 50%, rgba(108, 92, 231, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(0, 212, 255, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 20%, rgba(162, 155, 254, 0.05) 0%, transparent 40%);
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 1;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+
+        .orb-1 { width: 500px; height: 500px; background: rgba(108, 92, 231, 0.15); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(0, 212, 255, 0.12); bottom: -50px; right: -50px; animation-delay: -7s; }
+        .orb-3 { width: 300px; height: 300px; background: rgba(162, 155, 254, 0.10); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -14s; }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 40px) scale(0.9); }
+            75% { transform: translate(30px, 20px) scale(1.05); }
+        }
+
+        /* ============================================
+           SCROLLBAR
+           ============================================ */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-1); border-radius: 10px; box-shadow: 0 0 20px var(--accent-glow); }
+
+        /* ============================================
+           LOADING SCREEN
+           ============================================ */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #loading-screen.hidden { opacity: 0; visibility: hidden; }
+
+        .loader {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--accent-1);
+            border-bottom-color: var(--accent-2);
+            animation: spin 1s linear infinite;
+            position: relative;
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        .loader::before {
+            content: '';
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-left-color: var(--accent-2);
+            border-right-color: var(--accent-1);
+            animation: spin 0.6s linear infinite reverse;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loader-text {
+            margin-top: 24px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* ============================================
+           NAVIGATION - STICKY GLASS
+           ============================================ */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            z-index: 1000;
+            padding: 14px 0;
+            transition: var(--transition);
+            background: transparent;
+        }
+        .navbar.scrolled {
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 8px 0;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .nav-brand img { height: 38px; width: auto; }
+        .nav-brand .brand-text {
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .nav-brand .brand-text span {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            position: relative;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary);
+            background: var(--bg-glass);
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            border-radius: 2px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            padding: 10px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent-1), #a29bfe);
+            color: white;
+            box-shadow: 0 0 30px var(--accent-glow);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px var(--accent-glow), 0 8px 32px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-outline {
+            padding: 10px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid var(--border-glass);
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-outline:hover {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border-color: var(--accent-1);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .notification-bell {
+            position: relative;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 4px;
+        }
+        .notification-bell:hover {
+            color: var(--text-primary);
+            transform: scale(1.05);
+        }
+        .notification-bell .dot {
+            position: absolute;
+            top: 0; right: 0;
+            width: 8px; height: 8px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+            animation: dotPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+        }
+        @keyframes dotPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .nav-search {
+            display: flex;
+            align-items: center;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: 6px 14px;
+            transition: var(--transition);
+        }
+        .nav-search:focus-within {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .nav-search input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            padding: 6px 0;
+            width: 160px;
+            outline: none;
+        }
+        .nav-search input::placeholder { color: var(--text-muted); }
+        .nav-search i { color: var(--text-muted); margin-right: 8px; font-size: 14px; }
+
+        /* ============================================
+           NOTIFICATION PANEL
+           ============================================ */
+        .notification-panel {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(13, 13, 20, 0.98);
+            backdrop-filter: blur(30px);
+            border-left: 1px solid var(--border-glass);
+            z-index: 2000;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 24px;
+            overflow-y: auto;
+        }
+        .notification-panel.open { right: 0; }
+        .notification-panel .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .notification-panel .panel-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .notification-panel .panel-header .close-panel {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .notification-panel .panel-header .close-panel:hover {
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+
+        .notification-item {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: var(--transition);
+        }
+        .notification-item:hover {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 30px var(--accent-glow);
+            transform: translateX(4px);
+        }
+        .notification-item .notif-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .notification-item .notif-message { font-size: 13px; color: var(--text-secondary); }
+        .notification-item .notif-time { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+
+        .notification-empty {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .notification-empty i { font-size: 48px; color: var(--text-muted); opacity: 0.3; margin-bottom: 16px; }
+        .notification-empty h4 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+        .notification-empty p { color: var(--text-secondary); font-size: 14px; }
+
+        .panel-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1999;
+            display: none;
+        }
+        .panel-overlay.visible { display: block; }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+            overflow: hidden;
+            z-index: 2;
+        }
+        .hero .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .hero-text { animation: fadeInUp 1s ease; }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .hero-badge i { color: var(--accent-1); margin-right: 6px; }
+
+        .hero-title {
+            font-size: clamp(44px, 6vw, 72px);
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+        }
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px var(--accent-glow);
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin-bottom: 32px;
+            line-height: 1.7;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+        .hero-actions .btn {
+            padding: 14px 36px;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hero-actions .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), #a29bfe);
+            color: white;
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        .hero-actions .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 60px var(--accent-glow), 0 8px 32px rgba(108, 92, 231, 0.3);
+        }
+        .hero-actions .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-glass);
+        }
+        .hero-actions .btn-outline:hover {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border-color: var(--accent-2);
+            box-shadow: 0 0 40px var(--cyan-glow);
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 24px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-glass);
+        }
+        .stat-item .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-item .stat-label { font-size: 14px; color: var(--text-muted); margin-top: 2px; }
+
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .hero-visual .floating-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 32px 40px;
+            max-width: 420px;
+            width: 100%;
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+        .hero-visual .floating-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius-lg);
+            padding: 2px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.4;
+        }
+        .floating-card .card-icon {
+            width: 52px; height: 52px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--accent-1);
+            margin-bottom: 16px;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .floating-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .floating-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+        .floating-card .card-tag {
+            display: inline-block;
+            background: var(--accent-glow);
+            color: var(--accent-1);
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 12px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-16px); } }
+
+        .fade-in { opacity: 0; transform: translateY(30px); animation: fadeInUp 0.8s ease forwards; }
+        .fade-in-d1 { animation-delay: 0.1s; }
+        .fade-in-d2 { animation-delay: 0.2s; }
+        .fade-in-d3 { animation-delay: 0.3s; }
+        .fade-in-d4 { animation-delay: 0.4s; }
+        .fade-in-d5 { animation-delay: 0.5s; }
+
+        /* ============================================
+           SECTIONS
+           ============================================ */
+        .section { padding: 80px 0; position: relative; z-index: 2; }
+        .section-header {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 56px;
+        }
+        .section-header h2 {
+            font-size: clamp(32px, 4vw, 44px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+        .section-header h2 span {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-header p { color: var(--text-secondary); font-size: 17px; }
+        .section .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+        /* ============================================
+           COURSE CARDS
+           ============================================ */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 28px;
+        }
+
+        .course-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        .course-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: var(--radius);
+            padding: 1px;
+            background: linear-gradient(135deg, transparent, var(--accent-1), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        .course-card:hover::before { opacity: 0.5; }
+        .course-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(108, 92, 231, 0.3);
+            box-shadow: 0 12px 60px rgba(108, 92, 231, 0.15), 0 0 40px var(--accent-glow);
+        }
+
+        .course-card .card-image {
+            width: 100%; height: 200px;
+            background: var(--bg-secondary);
+            overflow: hidden;
+            position: relative;
+        }
+        .course-card .card-image img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        .course-card:hover .card-image img { transform: scale(1.05); }
+
+        .course-card .card-image .card-badge {
+            position: absolute; top: 12px; right: 12px;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: white;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .course-card .card-body { padding: 24px; }
+        .course-card .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .course-card .card-meta .category { color: var(--accent-1); font-weight: 500; }
+        .course-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
+        .course-card .card-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .course-card .card-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .course-card .card-footer .info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .course-card .card-footer .info i { margin-right: 4px; }
+        .course-card .card-footer .btn-sm {
+            padding: 8px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-1), #a29bfe);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .course-card .card-footer .btn-sm:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        /* ============================================
+           CATEGORY CARDS
+           ============================================ */
+        .category-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .category-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(108, 92, 231, 0.3);
+            box-shadow: 0 12px 60px rgba(108, 92, 231, 0.15), 0 0 40px var(--accent-glow);
+        }
+        .category-card .cat-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .category-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .category-card p { color: var(--text-secondary); font-size: 14px; }
+        .category-card .cat-count {
+            display: inline-block;
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* ============================================
+           SOCIAL / CHANNELS SECTION
+           ============================================ */
+        .social-section {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .social-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 32px;
+            text-align: center;
+            transition: var(--transition);
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .social-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(108, 92, 231, 0.3);
+            box-shadow: 0 12px 60px rgba(108, 92, 231, 0.15);
+        }
+        .social-card .social-icon { font-size: 48px; margin-bottom: 12px; display: block; }
+        .social-card .social-icon.whatsapp { color: #25D366; }
+        .social-card .social-icon.tiktok { color: #00f2ea; }
+        .social-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .social-card p { color: var(--text-secondary); font-size: 14px; }
+        .social-card .social-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-1), #a29bfe);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .social-card .social-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        /* ============================================
+           EMPTY STATE
+           ============================================ */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+        .empty-state i { font-size: 56px; color: var(--text-muted); margin-bottom: 20px; opacity: 0.3; }
+        .empty-state h3 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+        .empty-state p { color: var(--text-secondary); font-size: 16px; }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-glass);
+            padding: 64px 0 32px;
+            position: relative;
+            z-index: 2;
+        }
+        .footer .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 48px;
+        }
+        .footer-brand h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+        .footer-brand h3 span {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .footer-brand p { color: var(--text-secondary); font-size: 14px; max-width: 320px; line-height: 1.7; }
+        .footer-links h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+        .footer-links ul { list-style: none; }
+        .footer-links ul li { margin-bottom: 10px; }
+        .footer-links ul a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        .footer-links ul a:hover {
+            color: var(--accent-1);
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .footer-bottom {
+            padding-top: 32px;
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-bottom p { color: var(--text-muted); font-size: 14px; }
+        .footer-socials { display: flex; gap: 16px; }
+        .footer-socials a {
+            color: var(--text-muted);
+            font-size: 18px;
+            transition: var(--transition);
+        }
+        .footer-socials a:hover {
+            color: var(--accent-1);
+            transform: translateY(-2px);
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .footer-dev {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-glass);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .footer-dev a {
+            color: var(--accent-1);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .footer-dev a:hover { text-shadow: 0 0 20px var(--accent-glow); }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .hero-content { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+            .hero-description { margin: 0 auto 32px; }
+            .hero-actions { justify-content: center; }
+            .hero-stats { justify-items: center; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%; left: 0;
+                width: 100%;
+                background: rgba(10, 10, 15, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 20px 24px;
+                gap: 4px;
+                border-bottom: 1px solid var(--border-glass);
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a { padding: 12px 16px; width: 100%; }
+            .nav-search { width: 100%; }
+            .nav-search input { width: 100%; }
+            .nav-actions .btn-outline { display: none; }
+            .hero-title { font-size: 36px; }
+            .hero-stats { grid-template-columns: repeat(2, 1fr); }
+            .courses-grid { grid-template-columns: 1fr; }
+            .social-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .notification-panel { width: 100%; right: -100%; }
+            .notification-panel.open { right: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .hero { padding: 100px 0 60px; }
+            .hero-title { font-size: 30px; }
+            .hero-actions .btn { width: 100%; justify-content: center; }
+            .section { padding: 60px 0; }
+            .course-card .card-footer { flex-direction: column; gap: 12px; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================
+    LOADING SCREEN
+    ============================================ -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <div class="loader-text">Loading...</div>
+    </div>
+
+    <!-- ============================================
+    ANIMATED BACKGROUND
+    ============================================ -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="bg-overlay"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- ============================================
+    NOTIFICATION PANEL
+    ============================================ -->
+    <div class="panel-overlay" id="panelOverlay"></div>
+    <div class="notification-panel" id="notificationPanel">
+        <div class="panel-header">
+            <h2><i class="fas fa-bell" style="margin-right: 8px;"></i>Arifa</h2>
+            <button class="close-panel" id="closePanel"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="notificationList">
+            <div class="notification-empty">
+                <i class="fas fa-bell-slash"></i>
+                <h4>Hakuna Arifa</h4>
+                <p>Hakuna arifa mpya kwa sasa.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+    NAVIGATION
+    ============================================ -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="nav-brand" id="brandLink">
+                <img src="" alt="Logo" id="navLogo" style="display:none;">
+                <span class="brand-text" id="navBrandText">PhoneFix <span>Pro</span></span>
+            </a>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#courses">Mafunzo</a></li>
+                <li><a href="#categories">Kategoria</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <div class="nav-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Tafuta..." id="searchInput">
+                </div>
+                <button class="notification-bell" id="notificationBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="dot" id="notifDot"></span>
+                </button>
+                <button class="btn-primary" id="getStartedBtn">Anza Sasa</button>
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================
+    HERO SECTION
+    ============================================ -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-badge fade-in">
+                        <i class="fas fa-sparkles"></i> Platform ya Mafunzo
+                    </div>
+                    <h1 class="hero-title fade-in fade-in-d1" id="heroTitle">
+                        Jifunze. <span class="highlight">Jenga.</span> Kua.
+                    </h1>
+                    <p class="hero-description fade-in fade-in-d2" id="heroDescription">
+                        Jipatie ujuzi mpya na kuboresha taaluma yako kwa mafunzo ya kisasa.
+                    </p>
+                    <div class="hero-actions fade-in fade-in-d3">
+                        <a href="#courses" class="btn btn-primary" id="heroCTA">
+                            <i class="fas fa-rocket"></i> Anza Sasa
+                        </a>
+                        <a href="#about" class="btn btn-outline">
+                            <i class="fas fa-play-circle"></i> Jifunze Zaidi
+                        </a>
+                    </div>
+                    <div class="hero-stats fade-in fade-in-d4" id="heroStats">
+                        <!-- Dynamic stats from API -->
+                    </div>
+                </div>
+
+                <div class="hero-visual fade-in fade-in-d5">
+                    <div class="floating-card">
+                        <div class="card-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Mafunzo Bora</h3>
+                        <p>Pata ujuzi wa hali ya juu kutoka kwa wataalamu.</p>
+                        <span class="card-tag">Premium</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    COURSES SECTION
+    ============================================ -->
+    <section class="section" id="courses">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>Mafunzo <span>Yanayopatikana</span></h2>
+                <p>Chagua kozi inayokufaa na anza safari yako ya kujifunza</p>
+            </div>
+            <div class="courses-grid" id="coursesGrid">
+                <!-- Courses rendered by JavaScript from Firestore -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    CATEGORIES SECTION
+    ============================================ -->
+    <section class="section" id="categories" style="background: var(--bg-secondary);">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2><span>Kategoria</span></h2>
+                <p>Gundua mafunzo kulingana na masomo yanayokuvutia</p>
+            </div>
+            <div class="courses-grid" id="categoriesGrid">
+                <!-- Categories rendered by JavaScript from Firestore -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    ABOUT SECTION
+    ============================================ -->
+    <section class="section" id="about">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>Kuhusu <span>Sisi</span></h2>
+                <p>Kujifunza ni safari, na sisi tuko hapa kukusaidia</p>
+            </div>
+            <div style="text-align: center; max-width: 720px; margin: 0 auto;">
+                <p style="color: var(--text-secondary); font-size: 17px; line-height: 1.8;">
+                    PhoneFix Pro ni platform maalum iliyotengenezwa kutoa mafunzo ya kisasa kuhusu ufundi wa simu,
+                    kurekebisha matatizo ya software na hardware, pamoja na maujanja yote ya WhatsApp na mitandao ya kijamii.
+                    Jifunze kuwa mtaalamu wa teknolojia kiganjani mwako.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    CHANNELS / SOCIAL SECTION
+    ============================================ -->
+    <section class="section social-section" id="channels">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2><span>Jiunge</span> Nasi</h2>
+                <p>Fuata channel zetu kwa mafunzo zaidi na updates</p>
+            </div>
+            <div class="social-grid">
+                <a href="https://whatsapp.com/channel/0029VbCRC9b5fM5cruU8PF2M" target="_blank" class="social-card fade-in fade-in-d1">
+                    <span class="social-icon whatsapp"><i class="fab fa-whatsapp"></i></span>
+                    <h3>WhatsApp Channel</h3>
+                    <p>Jiunge na channel yetu ya WhatsApp kwa mafunzo na updates za kila siku.</p>
+                    <span class="social-btn">Jiunge Sasa</span>
+                </a>
+                <a href="https://www.tiktok.com/@dvary16?_r=1&_t=ZS-98u1JQH8PBt" target="_blank" class="social-card fade-in fade-in-d2">
+                    <span class="social-icon tiktok"><i class="fab fa-tiktok"></i></span>
+                    <h3>TikTok</h3>
+                    <p>Fuata sisi kwenye TikTok kwa video za mafunzo na mbinu za kisasa.</p>
+                    <span class="social-btn">Fuata Sasa</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    CONTACT SECTION
+    ============================================ -->
+    <section class="section" id="contact" style="background: var(--bg-secondary);">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2><span>Wasiliana</span> Nasi</h2>
+                <p>Tutumie ujumbe na tutakujibu haraka</p>
+            </div>
+            <div style="max-width: 560px; margin: 0 auto;">
+                <form id="contactForm">
+                    <div style="margin-bottom: 16px;">
+                        <input type="text" id="contactName" placeholder="Jina lako" required
+                               style="width: 100%; padding: 14px 18px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 15px; transition: var(--transition);">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <input type="email" id="contactEmail" placeholder="Barua pepe" required
+                               style="width: 100%; padding: 14px 18px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 15px; transition: var(--transition);">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <input type="text" id="contactSubject" placeholder="Mada"
+                               style="width: 100%; padding: 14px 18px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 15px; transition: var(--transition);">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <textarea id="contactMessage" placeholder="Ujumbe wako..." rows="5" required
+                                  style="width: 100%; padding: 14px 18px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 15px; resize: vertical; transition: var(--transition);"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px;">
+                        <i class="fas fa-paper-plane"></i> Tuma Ujumbe
+                    </button>
+                </form>
+                <div id="contactResponse" style="margin-top: 16px; text-align: center;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    FOOTER
+    ============================================ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3 id="footerBrand">PhoneFix <span>Pro</span></h3>
+                    <p id="footerDescription">Jifunze ujuzi mpya na ujenge mustakabali wako.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Mafunzo</h4>
+                    <ul>
+                        <li><a href="#courses">Kozi zote</a></li>
+                        <li><a href="#categories">Kategoria</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Habari</h4>
+                    <ul>
+                        <li><a href="#about">Kuhusu sisi</a></li>
+                        <li><a href="#contact">Wasiliana</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Viungo</h4>
+                    <ul>
+                        <li><a href="#channels">Channel zetu</a></li>
+                        <li><a href="https://whatsapp.com/channel/0029VbCRC9b5fM5cruU8PF2M" target="_blank">WhatsApp</a></li>
+                        <li><a href="https://www.tiktok.com/@dvary16?_r=1&_t=ZS-98u1JQH8PBt" target="_blank">TikTok</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p id="footerCopyright">&copy; 2026 PhoneFix Pro. Haki zote zimehifadhiwa.</p>
+                <div class="footer-socials" id="footerSocials">
+                    <a href="https://whatsapp.com/channel/0029VbCRC9b5fM5cruU8PF2M" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://www.tiktok.com/@dvary16?_r=1&_t=ZS-98u1JQH8PBt" target="_blank"><i class="fab fa-tiktok"></i></a>
+                    <a href="mailto:dullamanyama0@gmail.com"><i class="fas fa-envelope"></i></a>
+                    <a href="tel:+255724525910"><i class="fas fa-phone"></i></a>
+                </div>
+            </div>
+            <div class="footer-dev">
+                Developed by <a href="mailto:dullamanyama0@gmail.com">Dvary</a> | 
+                Contact: <a href="mailto:dullamanyama0@gmail.com">dullamanyama0@gmail.com</a> | 
+                <a href="tel:+255724525910">+255 724 525 910</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================
+    JAVASCRIPT - COMPLETE FRONTEND LOGIC
+    ============================================ -->
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = window.location.origin + '/api';
+        let notificationsData = [];
+
+        // ============================================
+        // LOADING SCREEN
+        // ============================================
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+            }, 800);
+        });
+
+        // ============================================
+        // ANIMATED BACKGROUND - Aurora/Light Waves
+        // ============================================
+        (function initBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            const PARTICLE_COUNT = 100;
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = (Math.random() - 0.5) * 0.3;
+                    this.speedY = (Math.random() - 0.5) * 0.3;
+                    this.opacity = Math.random() * 0.5 + 0.1;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x < 0 || this.x > width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > height) this.speedY *= -1;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(108, 92, 231, ${this.opacity})`;
+                    ctx.fill();
+                    ctx.shadowColor = 'rgba(108, 92, 231, 0.1)';
+                    ctx.shadowBlur = 10;
+                }
+            }
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push(new Particle());
+            }
+
+            function drawConnections() {
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 150) {
+                            const opacity = 1 - (dist / 150);
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(108, 92, 231, ${opacity * 0.15})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                
+                const gradient = ctx.createRadialGradient(
+                    width * 0.3 + Math.sin(Date.now() * 0.0001) * 100,
+                    height * 0.4 + Math.cos(Date.now() * 0.00015) * 100,
+                    0,
+                    width * 0.3 + Math.sin(Date.now() * 0.0001) * 100,
+                    height * 0.4 + Math.cos(Date.now() * 0.00015) * 100,
+                    Math.max(width, height) * 0.6
+                );
+                gradient.addColorStop(0, 'rgba(108, 92, 231, 0.04)');
+                gradient.addColorStop(0.3, 'rgba(0, 212, 255, 0.03)');
+                gradient.addColorStop(0.7, 'rgba(162, 155, 254, 0.02)');
+                gradient.addColorStop(1, 'rgba(10, 10, 15, 0)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+
+                particles.forEach(p => { p.update(); p.draw(); });
+                drawConnections();
+                
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            window.addEventListener('resize', () => {
+                resize();
+                particles.forEach(p => {
+                    p.x = Math.random() * width;
+                    p.y = Math.random() * height;
+                });
+            });
+        })();
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        (function initNav() {
+            const navbar = document.getElementById('navbar');
+            const menuToggle = document.getElementById('menuToggle');
+            const navLinks = document.getElementById('navLinks');
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('open');
+            });
+
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('open');
+                });
+            });
+
+            const sections = document.querySelectorAll('section[id]');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const top = section.offsetTop - 120;
+                    if (window.scrollY >= top) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                document.querySelectorAll('.nav-links a').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        })();
+
+        // ============================================
+        // NOTIFICATION SYSTEM
+        // ============================================
+        (function initNotifications() {
+            const bell = document.getElementById('notificationBell');
+            const panel = document.getElementById('notificationPanel');
+            const overlay = document.getElementById('panelOverlay');
+            const closeBtn = document.getElementById('closePanel');
+
+            function openPanel() {
+                panel.classList.add('open');
+                overlay.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closePanel() {
+                panel.classList.remove('open');
+                overlay.classList.remove('visible');
+                document.body.style.overflow = '';
+            }
+
+            bell.addEventListener('click', openPanel);
+            closeBtn.addEventListener('click', closePanel);
+            overlay.addEventListener('click', closePanel);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closePanel();
+            });
+
+            window.openNotifications = openPanel;
+            window.closeNotifications = closePanel;
+        })();
+
+        // ============================================
+        // API HELPER - INAWASILIANA NA SERVER → FIRESTORE
+        // ============================================
+        async function apiFetch(endpoint, options = {}) {
+            try {
+                const response = await fetch(API_BASE + endpoint, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(options.headers || {})
+                    }
+                });
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Something went wrong');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        // ============================================
+        // LOAD NOTIFICATIONS - FROM FIRESTORE
+        // ============================================
+        async function loadNotifications() {
+            try {
+                const data = await apiFetch('/notifications');
+                notificationsData = data || [];
+                renderNotifications();
+                updateNotificationBadge();
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        function renderNotifications() {
+            const container = document.getElementById('notificationList');
+            if (!notificationsData || notificationsData.length === 0) {
+                container.innerHTML = `
+                    <div class="notification-empty">
+                        <i class="fas fa-bell-slash"></i>
+                        <h4>Hakuna Arifa</h4>
+                        <p>Hakuna arifa mpya kwa sasa.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = notificationsData.map(notif => `
+                <div class="notification-item">
+                    <div class="notif-title">${notif.title || 'Arifa'}</div>
+                    <div class="notif-message">${notif.message || ''}</div>
+                    <div class="notif-time">${new Date(notif.createdAt).toLocaleDateString('sw-TZ', { 
+                        day: 'numeric', month: 'short', year: 'numeric', 
+                        hour: '2-digit', minute: '2-digit' 
+                    })}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateNotificationBadge() {
+            const dot = document.getElementById('notifDot');
+            if (notificationsData && notificationsData.length > 0) {
+                dot.style.display = 'block';
+            } else {
+                dot.style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // LOAD HOMEPAGE - FROM FIRESTORE
+        // ============================================
+        async function loadHomepage() {
+            try {
+                const data = await apiFetch('/homepage');
+                
+                if (data.heroTitle) {
+                    document.getElementById('heroTitle').innerHTML = data.heroTitle;
+                }
+                if (data.heroDescription) {
+                    document.getElementById('heroDescription').textContent = data.heroDescription;
+                }
+                if (data.heroCTA) {
+                    document.getElementById('heroCTA').innerHTML = `<i class="fas fa-rocket"></i> ${data.heroCTA}`;
+                }
+                if (data.websiteName) {
+                    document.getElementById('navBrandText').innerHTML = data.websiteName.replace(/ /g, '<span> </span>');
+                    document.getElementById('footerBrand').innerHTML = data.websiteName.replace(/ /g, '<span> </span>');
+                }
+                if (data.websiteLogo) {
+                    const logo = document.getElementById('navLogo');
+                    logo.src = data.websiteLogo;
+                    logo.style.display = 'inline';
+                }
+                if (data.websiteDescription) {
+                    document.getElementById('footerDescription').textContent = data.websiteDescription;
+                }
+
+                const statsContainer = document.getElementById('heroStats');
+                if (data.statistics && data.statistics.length > 0) {
+                    statsContainer.innerHTML = data.statistics.map(stat => `
+                        <div class="stat-item">
+                            <div class="stat-number">${stat.number}</div>
+                            <div class="stat-label">${stat.label}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    statsContainer.innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Error loading homepage:', error);
+            }
+        }
+
+        // ============================================
+        // LOAD COURSES - FROM FIRESTORE
+        // ============================================
+        async function loadCourses(searchQuery = '') {
+            const grid = document.getElementById('coursesGrid');
+            grid.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1 / -1;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i>
+                    <p style="margin-top: 12px;">Inapakia mafunzo...</p>
+                </div>
+            `;
+
+            try {
+                let url = '/courses';
+                if (searchQuery) {
+                    url += `?search=${encodeURIComponent(searchQuery)}`;
+                }
+                const courses = await apiFetch(url);
+
+                if (!courses || courses.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-book-open"></i>
+                            <h3>Hakuna Mafunzo</h3>
+                            <p>Hakuna mafunzo yaliyopatikana kwa sasa. Rudi tena baadaye.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = courses.map(course => `
+                    <div class="course-card" onclick="viewCourse('${course.id}')">
+                        <div class="card-image">
+                            ${course.coverImage ? `<img src="${course.coverImage}" alt="${course.title}">` : 
+                            `<div style="width:100%;height:100%;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:48px;"><i class="fas fa-graduation-cap"></i></div>`}
+                            ${course.isFeatured ? '<span class="card-badge">Featured</span>' : ''}
+                        </div>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="category">${course.category || 'General'}</span>
+                                <span>•</span>
+                                <span>${course.level || 'Beginner'}</span>
+                            </div>
+                            <h3>${course.title || 'Untitled Course'}</h3>
+                            <p class="card-description">${course.description || 'No description available.'}</p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="info">
+                                <span><i class="fas fa-user"></i> ${course.instructor || 'Unknown'}</span>
+                                <span><i class="fas fa-clock"></i> ${course.duration || 'N/A'}</span>
+                                <span><i class="fas fa-video"></i> ${course.lessons || 0}</span>
+                            </div>
+                            <button class="btn-sm">${course.price > 0 ? '💰 ' + course.price : 'Free'}</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error</h3>
+                        <p>Imeshindwa kupakia mafunzo. Tafadhali jaribu tena.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // VIEW COURSE DETAILS
+        // ============================================
+        function viewCourse(courseId) {
+            alert(`Course ID: ${courseId}\nCourse details will be shown here.`);
+        }
+
+        // ============================================
+        // LOAD CATEGORIES - FROM FIRESTORE
+        // ============================================
+        async function loadCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1 / -1;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i>
+                    <p style="margin-top: 12px;">Inapakia kategoria...</p>
+                </div>
+            `;
+
+            try {
+                const categories = await apiFetch('/categories');
+
+                if (!categories || categories.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <i class="fas fa-tags"></i>
+                            <h3>Hakuna Kategoria</h3>
+                            <p>Kategoria zitaonekana hapa zikiwekwa na admin.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = categories.map(cat => `
+                    <div class="category-card" onclick="filterByCategory('${cat.id}')">
+                        <div class="cat-icon">
+                            <i class="${cat.icon || 'fas fa-folder'}"></i>
+                        </div>
+                        <h3>${cat.name}</h3>
+                        <p>${cat.description || ''}</p>
+                        <span class="cat-count">${cat.courseCount || 0} mafunzo</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error</h3>
+                        <p>Imeshindwa kupakia kategoria.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function filterByCategory(categoryId) {
+            alert(`Filtering by category: ${categoryId}`);
+        }
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        document.getElementById('searchInput').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (query) {
+                    loadCourses(query);
+                } else {
+                    loadCourses();
+                }
+            }
+        });
+
+        // ============================================
+        // CONTACT FORM - SENDS TO FIRESTORE
+        // ============================================
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('contactName').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const subject = document.getElementById('contactSubject').value.trim();
+            const message = document.getElementById('contactMessage').value.trim();
+            const responseDiv = document.getElementById('contactResponse');
+
+            if (!name || !email || !message) {
+                responseDiv.innerHTML = '<p style="color: #ff6b6b;">Tafadhali jaza sehemu zote muhimu.</p>';
+                return;
+            }
+
+            try {
+                await apiFetch('/messages', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email, subject, message })
+                });
+
+                responseDiv.innerHTML = '<p style="color: #51cf66;">Ujumbe wako umetumwa. Tutakujibu haraka!</p>';
+                document.getElementById('contactForm').reset();
+            } catch (error) {
+                responseDiv.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+            }
+        });
+
+        // ============================================
+        // LOAD FOOTER SETTINGS - FROM FIRESTORE
+        // ============================================
+        async function loadFooterSettings() {
+            try {
+                const settings = await apiFetch('/settings');
+                if (settings) {
+                    if (settings.footerContent) {
+                        if (settings.footerContent.copyright) {
+                            document.getElementById('footerCopyright').textContent = settings.footerContent.copyright;
+                        }
+                        if (settings.footerContent.description) {
+                            document.getElementById('footerDescription').textContent = settings.footerContent.description;
+                        }
+                    }
+                    if (settings.socialLinks) {
+                        const socialsContainer = document.getElementById('footerSocials');
+                        let socialHtml = '';
+                        socialHtml += `<a href="https://whatsapp.com/channel/0029VbCRC9b5fM5cruU8PF2M" target="_blank"><i class="fab fa-whatsapp"></i></a>`;
+                        socialHtml += `<a href="https://www.tiktok.com/@dvary16?_r=1&_t=ZS-98u1JQH8PBt" target="_blank"><i class="fab fa-tiktok"></i></a>`;
+                        socialHtml += `<a href="mailto:dullamanyama0@gmail.com"><i class="fas fa-envelope"></i></a>`;
+                        socialHtml += `<a href="tel:+255724525910"><i class="fas fa-phone"></i></a>`;
+                        socialsContainer.innerHTML = socialHtml;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading footer settings:', error);
+            }
+        }
+
+        // ============================================
+        // GET STARTED BUTTON
+        // ============================================
+        document.getElementById('getStartedBtn').addEventListener('click', () => {
+            document.getElementById('courses').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // ============================================
+        // INIT - LOADS EVERYTHING FROM FIRESTORE
+        // ============================================
+        (async function init() {
+            console.log('🚀 PhoneFix Pro - Loading data from Firestore...');
+            await loadHomepage();
+            await loadCourses();
+            await loadCategories();
+            await loadNotifications();
+            await loadFooterSettings();
+            console.log('✅ All data loaded from Firestore successfully!');
+        })();
+
+        // Auto-refresh notifications every 30 seconds
+        setInterval(() => {
+            loadNotifications();
+        }, 30000);
+
+        // Expose functions globally
+        window.viewCourse = viewCourse;
+        window.filterByCategory = filterByCategory;
+        window.loadCourses = loadCourses;
+        window.openNotifications = window.openNotifications;
+        window.closeNotifications = window.closeNotifications;
+
+        console.log('📱 WhatsApp: https://whatsapp.com/channel/0029VbCRC9b5fM5cruU8PF2M');
+        console.log('🎵 TikTok: https://www.tiktok.com/@dvary16');
+        console.log('👨‍💻 Developer: Dvary');
+        console.log('💾 All data is stored in Firestore - Nothing is lost on update!');
+    </script>
+</body>
+  </html>
