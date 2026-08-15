@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="sw" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Chat - Meet people. Start conversations. Stay connected.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ============================================
+           ROOT VARIABLES
+           ============================================ */
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-glass: rgba(255, 255, 255, 0.06);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.75);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --accent: #6c5ce7;
+            --accent-hover: #7c6cf0;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --accent-2: #00d4ff;
+            --border-glass: rgba(255, 255, 255, 0.06);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-lg: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --toast-bg: #12121a;
+            --success: #51cf66;
+            --danger: #ff6b6b;
+            --warning: #ffd93d;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #e8eaed;
+            --bg-card: rgba(0, 0, 0, 0.03);
+            --bg-glass: rgba(0, 0, 0, 0.05);
+            --text-primary: #1a1a2e;
+            --text-secondary: rgba(0, 0, 0, 0.7);
+            --text-muted: rgba(0, 0, 0, 0.4);
+            --border-glass: rgba(0, 0, 0, 0.08);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --toast-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* ============================================
+           SCROLLBAR
+           ============================================ */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        /* ============================================
+           BACKGROUND GLOW
+           ============================================ */
+        .bg-glow {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        [data-theme="light"] .bg-glow { display: none; }
+
+        .bg-glow .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.06;
+            animation: orbFloat 25s ease-in-out infinite;
+        }
+        .bg-glow .glow-orb:nth-child(1) { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -150px; }
+        .bg-glow .glow-orb:nth-child(2) { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; animation-delay: -8s; }
+        .bg-glow .glow-orb:nth-child(3) { width: 300px; height: 300px; background: #a29bfe; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -15s; }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(60px, -30px) scale(1.05); }
+            66% { transform: translate(-30px, 40px) scale(0.95); }
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 30% 40%, rgba(108, 92, 231, 0.04) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 60%, rgba(0, 212, 255, 0.03) 0%, transparent 50%);
+        }
+        [data-theme="light"] .bg-gradient { display: none; }
+
+        /* ============================================
+           LOADING
+           ============================================ */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #loading-screen.hidden { opacity: 0; visibility: hidden; }
+        .loader {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--accent);
+            border-bottom-color: var(--accent-2);
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { margin-top: 16px; color: var(--text-secondary); font-size: 13px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.6; }
+
+        /* ============================================
+           THEME & LANGUAGE TOGGLE
+           ============================================ */
+        .theme-toggle, .lang-toggle {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            color: var(--text-secondary);
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-toggle:hover, .lang-toggle:hover {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ============================================
+           NAVIGATION
+           ============================================ */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            z-index: 1000;
+            padding: 14px 0;
+            transition: var(--transition);
+            background: transparent;
+        }
+        .navbar.scrolled {
+            background: var(--bg-secondary);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 10px 0;
+            box-shadow: var(--shadow);
+        }
+        .navbar .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .nav-brand .logo-icon {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .nav-brand .brand-text {
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .nav-brand .brand-text span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary);
+            background: var(--bg-glass);
+        }
+        .nav-links a.active { color: var(--accent); }
+
+        .nav-actions { display: flex; align-items: center; gap: 8px; }
+
+        .btn-primary {
+            padding: 10px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), #a29bfe);
+            color: white;
+            box-shadow: 0 0 30px var(--accent-glow);
+            transition: var(--transition);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px var(--accent-glow), 0 8px 32px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-outline-nav {
+            padding: 10px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid var(--border-glass);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-outline-nav:hover {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        .user-avatar-nav {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transition: var(--transition);
+        }
+        .user-avatar-nav:hover { transform: scale(1.05); }
+
+        .nav-user-info { display: flex; align-items: center; gap: 10px; }
+        .nav-user-info .username { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* ============================================
+           AUTH OVERLAY
+           ============================================ */
+        .auth-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        [data-theme="light"] .auth-overlay {
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .auth-overlay.visible { display: flex; }
+
+        .auth-modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            max-width: 440px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 32px 28px;
+            box-shadow: var(--shadow);
+            animation: modalPop 0.3s ease;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .auth-modal .auth-close {
+            position: absolute;
+            top: 12px; right: 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+        }
+        .auth-modal .auth-close:hover {
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+
+        .auth-modal .auth-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .auth-modal .auth-logo h2 {
+            font-size: 24px;
+            font-weight: 800;
+        }
+        .auth-modal .auth-logo h2 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .auth-modal .auth-logo p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .auth-modal .auth-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            background: var(--bg-glass);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+        }
+        .auth-modal .auth-tabs button {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+        }
+        .auth-modal .auth-tabs button.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .auth-modal .auth-tabs button:hover { color: var(--text-primary); }
+
+        .auth-modal .auth-form { display: none; }
+        .auth-modal .auth-form.active { display: block; }
+
+        .auth-modal .form-group { margin-bottom: 14px; }
+        .auth-modal .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .auth-modal .form-group input, .auth-modal .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .auth-modal .form-group input:focus, .auth-modal .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .auth-modal .form-group input::placeholder { color: var(--text-muted); }
+        .auth-modal .form-group select option { background: var(--bg-secondary); color: var(--text-primary); }
+
+        .auth-modal .form-group .password-wrapper {
+            position: relative;
+        }
+        .auth-modal .form-group .password-wrapper input {
+            padding-right: 44px;
+        }
+        .auth-modal .form-group .password-wrapper .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        .auth-modal .form-group .password-wrapper .toggle-password:hover {
+            color: var(--text-primary);
+        }
+
+        .auth-modal .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .auth-modal .password-strength {
+            height: 4px;
+            background: var(--border-glass);
+            border-radius: 4px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .auth-modal .password-strength .bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: var(--transition);
+            width: 0%;
+        }
+        .auth-modal .password-strength .bar.weak { background: var(--danger); width: 25%; }
+        .auth-modal .password-strength .bar.medium { background: var(--warning); width: 50%; }
+        .auth-modal .password-strength .bar.strong { background: var(--success); width: 75%; }
+        .auth-modal .password-strength .bar.very-strong { background: var(--success); width: 100%; }
+
+        .auth-modal .password-strength-text {
+            font-size: 11px;
+            margin-top: 4px;
+            color: var(--text-muted);
+        }
+
+        .auth-modal .form-group.checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .auth-modal .form-group.checkbox input[type="checkbox"] {
+            width: 18px; height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+        .auth-modal .form-group.checkbox label {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+        .auth-modal .form-group.checkbox label a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .auth-modal .form-group.checkbox label a:hover { text-decoration: underline; }
+
+        .auth-modal .btn-auth {
+            width: 100%;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), #a29bfe);
+            color: white;
+            box-shadow: 0 0 30px var(--accent-glow);
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .auth-modal .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px var(--accent-glow);
+        }
+        .auth-modal .btn-auth:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-modal .auth-error {
+            color: var(--danger);
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+        .auth-modal .auth-success {
+            color: var(--success);
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        /* ============================================
+           TOAST NOTIFICATIONS
+           ============================================ */
+        .toast-container {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 380px;
+            width: 100%;
+        }
+        .toast {
+            background: var(--toast-bg);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideUp 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+        .toast.info { border-left: 4px solid var(--accent); }
+        .toast .toast-icon { font-size: 18px; }
+        .toast.success .toast-icon { color: var(--success); }
+        .toast.error .toast-icon { color: var(--danger); }
+        .toast.warning .toast-icon { color: var(--warning); }
+        .toast.info .toast-icon { color: var(--accent); }
+        .toast .toast-message { flex: 1; font-size: 13px; }
+        .toast .toast-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* ============================================
+           HERO
+           ============================================ */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 60px;
+            z-index: 2;
+        }
+        .hero .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+            z-index: 2;
+        }
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        .hero-text { animation: fadeUp 0.8s ease; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        .hero-badge i { color: var(--accent); margin-right: 6px; }
+
+        .hero-title {
+            font-size: clamp(40px, 5.5vw, 68px);
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+        }
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin-bottom: 32px;
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+        .hero-actions .btn {
+            padding: 14px 32px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hero-actions .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #a29bfe);
+            color: white;
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        .hero-actions .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 60px var(--accent-glow), 0 8px 32px rgba(108, 92, 231, 0.3);
+        }
+        .hero-actions .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-glass);
+        }
+        .hero-actions .btn-outline:hover {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-glass);
+        }
+        .hero-features .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .hero-features .feature i {
+            color: var(--accent);
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .hero-visual .mockup {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-visual .mockup::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius-lg);
+            padding: 2px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.3;
+        }
+
+        .mockup .mockup-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .mockup .mockup-header .avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+        .mockup .mockup-header .name { font-weight: 600; font-size: 14px; }
+        .mockup .mockup-header .status {
+            font-size: 12px;
+            color: var(--success);
+            margin-left: auto;
+        }
+        .mockup .mockup-header .status i { margin-right: 4px; }
+
+        .mockup .mockup-chat .msg {
+            display: flex;
+            margin-bottom: 10px;
+            max-width: 85%;
+        }
+        .mockup .mockup-chat .msg.received {
+            justify-content: flex-start;
+        }
+        .mockup .mockup-chat .msg.sent {
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+        .mockup .mockup-chat .msg .bubble {
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+        .mockup .mockup-chat .msg.received .bubble {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            color: var(--text-primary);
+        }
+        .mockup .mockup-chat .msg.sent .bubble {
+            background: linear-gradient(135deg, var(--accent), #a29bfe);
+            color: white;
+        }
+        .mockup .mockup-chat .msg .time {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: block;
+        }
+        .mockup .mockup-chat .msg.sent .time { color: rgba(255, 255, 255, 0.6); }
+
+        .mockup .mockup-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-glass);
+        }
+        .mockup .mockup-input input {
+            flex: 1;
+            padding: 10px 14px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+        .mockup .mockup-input input::placeholder { color: var(--text-muted); }
+        .mockup .mockup-input .send-btn {
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent), #a29bfe);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transition: var(--transition);
+        }
+        .mockup .mockup-input .send-btn:hover { transform: scale(1.05); }
+
+        /* ============================================
+           FEATURES SECTION
+           ============================================ */
+        .features-section {
+            padding: 80px 0;
+            position: relative;
+            z-index: 2;
+            background: var(--bg-secondary);
+        }
+        .features-section .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .features-section .section-header {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 48px;
+        }
+        .features-section .section-header h2 {
+            font-size: clamp(32px, 4vw, 44px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+        .features-section .section-header h2 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .features-section .section-header p {
+            color: var(--text-secondary);
+            font-size: 17px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .feature-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            transition: var(--transition);
+            text-align: center;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(108, 92, 231, 0.2);
+            box-shadow: 0 12px 48px rgba(108, 92, 231, 0.08);
+        }
+        .feature-card .icon {
+            width: 56px; height: 56px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--accent);
+            margin: 0 auto 12px;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+        .feature-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-glass);
+            padding: 48px 0 24px;
+            position: relative;
+            z-index: 2;
+        }
+        .footer .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 32px;
+        }
+        .footer-brand h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .footer-brand h3 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .footer-brand p { color: var(--text-secondary); font-size: 14px; max-width: 320px; line-height: 1.7; }
+
+        .footer-links h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+        .footer-links ul { list-style: none; }
+        .footer-links ul li { margin-bottom: 8px; }
+        .footer-links ul a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        .footer-links ul a:hover { color: var(--accent); }
+
+        .footer-bottom {
+            padding-top: 24px;
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-bottom p { color: var(--text-muted); font-size: 14px; }
+        .footer-socials { display: flex; gap: 16px; }
+        .footer-socials a {
+            color: var(--text-muted);
+            font-size: 18px;
+            transition: var(--transition);
+        }
+        .footer-socials a:hover {
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .hero-content { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+            .hero-description { margin-left: auto; margin-right: auto; }
+            .hero-actions { justify-content: center; }
+            .hero-features { justify-items: center; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .hero-visual .mockup { max-width: 100%; }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%; left: 0;
+                width: 100%;
+                background: var(--bg-secondary);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 16px 24px;
+                gap: 4px;
+                border-bottom: 1px solid var(--border-glass);
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a { padding: 10px 14px; width: 100%; }
+            .nav-actions .btn-outline-nav { display: none; }
+
+            .hero-title { font-size: 32px; }
+            .hero-features { grid-template-columns: 1fr 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+
+            .auth-modal { padding: 24px 20px; margin: 10px; }
+            .auth-modal .form-row { grid-template-columns: 1fr; }
+
+            .mockup .mockup-chat .msg { max-width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .hero { padding: 100px 0 40px; min-height: 80vh; }
+            .hero-title { font-size: 28px; }
+            .hero-actions .btn { width: 100%; justify-content: center; }
+            .hero-features { grid-template-columns: 1fr; }
+            .nav-brand .brand-text { font-size: 17px; }
+            .auth-modal { padding: 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================
+    LOADING
+    ============================================ -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <div class="loader-text">Solo Chat</div>
+    </div>
+
+    <!-- ============================================
+    BACKGROUND
+    ============================================ -->
+    <div class="bg-glow">
+        <div class="glow-orb"></div>
+        <div class="glow-orb"></div>
+        <div class="glow-orb"></div>
+    </div>
+    <div class="bg-gradient"></div>
+
+    <!-- ============================================
+    AUTH OVERLAY
+    ============================================ -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-modal">
+            <button class="auth-close" id="authCloseBtn">&times;</button>
+            <div class="auth-logo">
+                <h2>Solo <span>Chat</span></h2>
+                <p id="authSubtitle">Ingia au Jisajili kuendelea</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="active" data-tab="login">Ingia</button>
+                <button data-tab="signup">Jisajili</button>
+            </div>
+
+            <!-- LOGIN -->
+            <div class="auth-form active" id="loginForm">
+                <div class="form-group">
+                    <label>Barua pepe au Username</label>
+                    <input type="text" id="loginEmail" placeholder="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Nenosiri</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        <button class="toggle-password" onclick="togglePasswordVisibility('loginPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Nikumbuke</label>
+                </div>
+                <button class="btn-auth" id="loginBtn">Ingia</button>
+                <div class="auth-error" id="loginError"></div>
+            </div>
+
+            <!-- SIGNUP -->
+            <div class="auth-form" id="signupForm">
+                <div class="form-group">
+                    <label>Username *</label>
+                    <input type="text" id="signupUsername" placeholder="johndoe" required>
+                </div>
+                <div class="form-group">
+                    <label>Jina lako *</label>
+                    <input type="text" id="signupName" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Barua pepe *</label>
+                    <input type="email" id="signupEmail" placeholder="user@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Nenosiri *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="signupPassword" placeholder="••••••••" required>
+                        <button class="toggle-password" onclick="togglePasswordVisibility('signupPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength"><div class="bar" id="passwordBar"></div></div>
+                    <div class="password-strength-text" id="passwordStrengthText">Nenosiri lako ni dhaifu</div>
+                </div>
+                <div class="form-group">
+                    <label>Thibitisha Nenosiri *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="signupConfirmPassword" placeholder="••••••••" required>
+                        <button class="toggle-password" onclick="togglePasswordVisibility('signupConfirmPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tarehe ya kuzaliwa</label>
+                        <input type="date" id="signupDob">
+                    </div>
+                    <div class="form-group">
+                        <label>Nchi</label>
+                        <select id="signupCountry">
+                            <option value="">Chagua nchi</option>
+                            <option value="Tanzania">🇹🇿 Tanzania</option>
+                            <option value="Kenya">🇰🇪 Kenya</option>
+                            <option value="Uganda">🇺🇬 Uganda</option>
+                            <option value="Nigeria">🇳🇬 Nigeria</option>
+                            <option value="South Africa">🇿🇦 South Africa</option>
+                            <option value="USA">🇺🇸 USA</option>
+                            <option value="UK">🇬🇧 UK</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="termsCheck">
+                    <label for="termsCheck">Nakubali <a href="#">Terms of Service</a> na <a href="#">Privacy Policy</a></label>
+                </div>
+                <button class="btn-auth" id="signupBtn">Jisajili</button>
+                <div class="auth-error" id="signupError"></div>
+                <div class="auth-success" id="signupSuccess"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+    TOAST CONTAINER
+    ============================================ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ============================================
+    NAVIGATION
+    ============================================ -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="nav-brand">
+                <span class="logo-icon">SC</span>
+                <span class="brand-text">Solo <span>Chat</span></span>
+            </a>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#privacy">Privacy</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="lang-toggle" id="langToggle" title="Toggle Language">
+                    <span id="langIcon">🇬🇧</span>
+                </button>
+                <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                <div id="navUserActions">
+                    <button class="btn-outline-nav" id="loginNavBtn">Ingia</button>
+                    <button class="btn-primary" id="registerNavBtn">Jisajili</button>
+                </div>
+                <div id="navUserLogged" style="display:none;align-items:center;gap:10px;">
+                    <div class="nav-user-info">
+                        <span class="username" id="userDisplayName">User</span>
+                        <div class="user-avatar-nav" id="userAvatarNav">U</div>
+                    </div>
+                    <button class="btn-outline-nav" id="logoutNavBtn" style="padding:6px 16px;font-size:12px;">Ondoka</button>
+                </div>
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================
+    HERO
+    ============================================ -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-badge">
+                        <i class="fas fa-sparkles"></i> Kituo cha mazungumzo
+                    </div>
+                    <h1 class="hero-title">
+                        Meet people. <span class="highlight">Start conversations.</span> Stay connected.
+                    </h1>
+                    <p class="hero-description">
+                        Solo Chat ni platform ya kisasa ya kuchat na watu kutoka duniani kote. 
+                        Gundua marafiki wapya, chati, na ujenge uhusiano.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" id="heroGetStarted">
+                            <i class="fas fa-rocket"></i> Anza Sasa
+                        </button>
+                        <button class="btn btn-outline" id="heroLearnMore">
+                            <i class="fas fa-play-circle"></i> Jifunze Zaidi
+                        </button>
+                    </div>
+                    <div class="hero-features">
+                        <span class="feature"><i class="fas fa-people-arrows"></i> Random Chat</span>
+                        <span class="feature"><i class="fas fa-user-plus"></i> Friends</span>
+                        <span class="feature"><i class="fas fa-users"></i> Group Chat</span>
+                        <span class="feature"><i class="fas fa-shield-alt"></i> Safe & Secure</span>
+                    </div>
+                </div>
+
+                <div class="hero-visual">
+                    <div class="mockup">
+                        <div class="mockup-header">
+                            <div class="avatar">S</div>
+                            <div>
+                                <div class="name">Sarah</div>
+                                <div style="font-size:12px;color:var(--text-muted);">Online</div>
+                            </div>
+                            <div class="status"><i class="fas fa-circle"></i> Online</div>
+                        </div>
+                        <div class="mockup-chat">
+                            <div class="msg received">
+                                <div class="bubble">
+                                    Hey! How are you? 👋
+                                    <span class="time">10:30</span>
+                                </div>
+                            </div>
+                            <div class="msg sent">
+                                <div class="bubble">
+                                    I'm great! Thanks for asking 😊
+                                    <span class="time">10:31</span>
+                                </div>
+                            </div>
+                            <div class="msg received">
+                                <div class="bubble">
+                                    Want to chat? I'm free right now.
+                                    <span class="time">10:32</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mockup-input">
+                            <input type="text" placeholder="Type a message...">
+                            <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    FEATURES
+    ============================================ -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Vipengele <span>vyetu</span></h2>
+                <p>Kila kitu unachohitaji kwa mazungumzo bora</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-people-arrows"></i></div>
+                    <h3>Random Chat</h3>
+                    <p>Pata mtu mpya wa kuzungumza naye mara moja. Hakuna kusubiri.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-user-friends"></i></div>
+                    <h3>Private Chat</h3>
+                    <p>Zungumza na marafiki zako kwa faragha. Hakuna mtu mwingine anayeona.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <h3>Group Chat</h3>
+                    <p>Jiunge na vyumba vya mazungumzo na watu wenye maslahi sawa.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-video"></i></div>
+                    <h3>Voice & Video</h3>
+                    <p>Piga simu ya sauti au video na marafiki zako popote walipo.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Safe & Secure</h3>
+                    <p>Mazungumzo yako yamehifadhiwa kwa usalama. Hakuna mtu mwingine anayeweza kuyaona.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-globe"></i></div>
+                    <h3>Global Community</h3>
+                    <p>Ungana na watu kutoka duniani kote. Pata marafiki wa kimataifa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    ABOUT
+    ============================================ -->
+    <section class="hero" id="about" style="min-height:60vh;padding:80px 0;">
+        <div class="container">
+            <div style="max-width:800px;margin:0 auto;text-align:center;">
+                <h2 style="font-size:clamp(32px,4vw,44px);font-weight:800;margin-bottom:20px;">
+                    Kuhusu <span style="background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Solo Chat</span>
+                </h2>
+                <p style="color:var(--text-secondary);font-size:17px;line-height:1.8;margin-bottom:16px;">
+                    Solo Chat ni platform ya mazungumzo ya kisasa iliyoundwa kuwaunganisha watu kutoka duniani kote. 
+                    Iwe unatafuta marafiki wapya, mazungumzo ya kawaida, au uhusiano wa karibu, Solo Chat inakupa nafasi.
+                </p>
+                <p style="color:var(--text-secondary);font-size:17px;line-height:1.8;">
+                    Tunaamini kwamba kila mtu anastahili kuunganishwa na wengine. 
+                    Ndio maana tumeunda platform salama, rahisi kutumia, na ya kisasa ambayo inakidhi mahitaji yako yote ya mazungumzo.
+                </p>
+                <div style="margin-top:24px;">
+                    <a href="#features" class="btn btn-primary" style="padding:14px 32px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),#a29bfe);color:white;box-shadow:0 0 30px var(--accent-glow);transition:var(--transition);text-decoration:none;display:inline-flex;align-items:center;gap:10px;">
+                        <i class="fas fa-arrow-right"></i> Gundua Sasa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    PRIVACY
+    ============================================ -->
+    <section class="features-section" id="privacy" style="background:var(--bg-primary);">
+        <div class="container">
+            <div style="max-width:800px;margin:0 auto;text-align:center;">
+                <h2 style="font-size:clamp(32px,4vw,44px);font-weight:800;margin-bottom:20px;">
+                    <span style="background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Faragha</span> na Usalama
+                </h2>
+                <p style="color:var(--text-secondary);font-size:17px;line-height:1.8;margin-bottom:16px;">
+                    Faragha yako ni muhimu kwetu. Tunatumia teknolojia ya kisasa ya usimbaji fiche 
+                    ili kuhakikisha mazungumzo yako yanasalia kuwa ya faragha.
+                </p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:32px;">
+                    <div style="background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius);padding:20px;">
+                        <i class="fas fa-lock" style="font-size:32px;color:var(--accent);margin-bottom:8px;display:block;"></i>
+                        <h4 style="font-weight:600;">Encrypted</h4>
+                        <p style="color:var(--text-secondary);font-size:13px;">Mazungumzo yamehifadhiwa</p>
+                    </div>
+                    <div style="background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius);padding:20px;">
+                        <i class="fas fa-user-secret" style="font-size:32px;color:var(--accent);margin-bottom:8px;display:block;"></i>
+                        <h4 style="font-weight:600;">Anonymous</h4>
+                        <p style="color:var(--text-secondary);font-size:13px;">Faragha yako imelindwa</p>
+                    </div>
+                    <div style="background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius);padding:20px;">
+                        <i class="fas fa-shield-alt" style="font-size:32px;color:var(--accent);margin-bottom:8px;display:block;"></i>
+                        <h4 style="font-weight:600;">Secure</h4>
+                        <p style="color:var(--text-secondary);font-size:13px;">Hakuna access ya watu wengine</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    FOOTER
+    ============================================ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>Solo <span>Chat</span></h3>
+                    <p>Meet people. Start conversations. Stay connected.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#privacy">Privacy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Report</a></li>
+                        <li><a href="#">Terms</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Discord</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">Instagram</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Solo Chat. All rights reserved.</p>
+                <div class="footer-socials">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================
+    JAVASCRIPT
+    ============================================ -->
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = window.location.origin + '/api';
+        let currentUser = null;
+        let authToken = null;
+        let currentLang = 'sw';
+
+        // ============================================
+        // TRANSLATIONS
+        // ============================================
+        const translations = {
+            sw: {
+                login: 'Ingia',
+                signup: 'Jisajili',
+                login_btn: 'Ingia',
+                signup_btn: 'Jisajili',
+                email_or_username: 'Barua pepe au Username',
+                password: 'Nenosiri',
+                remember_me: 'Nikumbuke',
+                username: 'Username *',
+                full_name: 'Jina lako *',
+                email: 'Barua pepe *',
+                confirm_password: 'Thibitisha Nenosiri *',
+                dob: 'Tarehe ya kuzaliwa',
+                country: 'Nchi',
+                terms: 'Nakubali Terms of Service na Privacy Policy',
+                password_weak: 'Nenosiri lako ni dhaifu',
+                password_medium: 'Nenosiri lako ni wastani',
+                password_strong: 'Nenosiri lako ni imara',
+                password_very_strong: 'Nenosiri lako ni imara sana',
+                auth_subtitle: 'Ingia au Jisajili kuendelea',
+                get_started: 'Anza Sasa',
+                learn_more: 'Jifunze Zaidi',
+                platform_badge: 'Kituo cha mazungumzo',
+                hero_title: 'Meet people. Start conversations. Stay connected.',
+                hero_desc: 'Solo Chat ni platform ya kisasa ya kuchat na watu kutoka duniani kote.',
+                features_title: 'Vipengele vyetu',
+                features_subtitle: 'Kila kitu unachohitaji kwa mazungumzo bora',
+                random_chat: 'Random Chat',
+                private_chat: 'Private Chat',
+                group_chat: 'Group Chat',
+                voice_video: 'Voice & Video',
+                safe_secure: 'Safe & Secure',
+                global_community: 'Global Community',
+                about_title: 'Kuhusu Solo Chat',
+                about_text: 'Solo Chat ni platform ya mazungumzo ya kisasa iliyoundwa kuwaunganisha watu kutoka duniani kote.',
+                privacy_title: 'Faragha na Usalama',
+                privacy_text: 'Faragha yako ni muhimu kwetu. Tunatumia teknolojia ya kisasa ya usimbaji fiche.',
+                encrypted: 'Encrypted',
+                anonymous: 'Anonymous',
+                secure: 'Secure'
+            },
+            en: {
+                login: 'Login',
+                signup: 'Signup',
+                login_btn: 'Login',
+                signup_btn: 'Signup',
+                email_or_username: 'Email or Username',
+                password: 'Password',
+                remember_me: 'Remember me',
+                username: 'Username *',
+                full_name: 'Full Name *',
+                email: 'Email *',
+                confirm_password: 'Confirm Password *',
+                dob: 'Date of Birth',
+                country: 'Country',
+                terms: 'I agree to Terms of Service and Privacy Policy',
+                password_weak: 'Password is weak',
+                password_medium: 'Password is medium',
+                password_strong: 'Password is strong',
+                password_very_strong: 'Password is very strong',
+                auth_subtitle: 'Login or Signup to continue',
+                get_started: 'Get Started',
+                learn_more: 'Learn More',
+                platform_badge: 'Chat Platform',
+                hero_title: 'Meet people. Start conversations. Stay connected.',
+                hero_desc: 'Solo Chat is a modern chat platform connecting people worldwide.',
+                features_title: 'Our Features',
+                features_subtitle: 'Everything you need for great conversations',
+                random_chat: 'Random Chat',
+                private_chat: 'Private Chat',
+                group_chat: 'Group Chat',
+                voice_video: 'Voice & Video',
+                safe_secure: 'Safe & Secure',
+                global_community: 'Global Community',
+                about_title: 'About Solo Chat',
+                about_text: 'Solo Chat is a modern chat platform designed to connect people from around the world.',
+                privacy_title: 'Privacy & Security',
+                privacy_text: 'Your privacy matters to us. We use modern encryption technology.',
+                encrypted: 'Encrypted',
+                anonymous: 'Anonymous',
+                secure: 'Secure'
+            }
+        };
+
+        // ============================================
+        // LANGUAGE & THEME
+        // ============================================
+        function toggleLanguage() {
+            currentLang = currentLang === 'sw' ? 'en' : 'sw';
+            document.getElementById('langIcon').textContent = currentLang === 'sw' ? '🇬🇧' : '🇹🇿';
+            updateTranslations();
+            localStorage.setItem('preferredLang', currentLang);
+        }
+
+        function updateTranslations() {
+            const t = translations[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    el.textContent = t[key];
+                }
+            });
+            // Update hero text
+            document.querySelector('.hero-title').innerHTML = t.hero_title.replace('Start conversations.', '<span class="highlight">Start conversations.</span>');
+            document.querySelector('.hero-description').textContent = t.hero_desc;
+            document.querySelector('.hero-badge span').textContent = t.platform_badge;
+            document.getElementById('authSubtitle').textContent = t.auth_subtitle;
+            document.querySelector('.features-section .section-header h2').innerHTML = t.features_title.replace('vyetu', '<span>vyetu</span>');
+            document.querySelector('.features-section .section-header p').textContent = t.features_subtitle;
+            document.querySelector('#about h2').innerHTML = t.about_title.replace('Solo Chat', '<span style="background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Solo Chat</span>');
+            document.querySelector('#about p').textContent = t.about_text;
+            document.querySelector('#privacy h2').innerHTML = t.privacy_title.replace('Faragha', '<span style="background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Faragha</span>');
+            document.querySelector('#privacy p').textContent = t.privacy_text;
+            
+            // Update feature cards
+            const features = document.querySelectorAll('.feature-card');
+            if (features.length >= 6) {
+                const featureTexts = [t.random_chat, t.private_chat, t.group_chat, t.voice_video, t.safe_secure, t.global_community];
+                features.forEach((card, i) => {
+                    if (i < featureTexts.length) {
+                        card.querySelector('h3').textContent = featureTexts[i];
+                    }
+                });
+            }
+            
+            // Update buttons
+            document.querySelector('#heroGetStarted span').textContent = t.get_started;
+            document.querySelector('#heroLearnMore span').textContent = t.learn_more;
+            document.querySelector('.auth-tabs button[data-tab="login"]').textContent = t.login;
+            document.querySelector('.auth-tabs button[data-tab="signup"]').textContent = t.signup;
+            document.getElementById('loginBtn').textContent = t.login_btn;
+            document.getElementById('signupBtn').textContent = t.signup_btn;
+            document.querySelector('#loginForm .form-group:first-child label').textContent = t.email_or_username;
+            document.querySelector('#loginForm .form-group:nth-child(2) label').textContent = t.password;
+            document.querySelector('#loginForm .checkbox label').textContent = t.remember_me;
+            document.querySelector('#signupForm .form-group:nth-child(1) label').textContent = t.username;
+            document.querySelector('#signupForm .form-group:nth-child(2) label').textContent = t.full_name;
+            document.querySelector('#signupForm .form-group:nth-child(3) label').textContent = t.email;
+            document.querySelector('#signupForm .form-group:nth-child(4) label').textContent = t.password;
+            document.querySelector('#signupForm .form-group:nth-child(6) label').textContent = t.confirm_password;
+            document.querySelector('#signupForm .form-group:nth-child(7) label').textContent = t.dob;
+            document.querySelector('#signupForm .form-group:nth-child(8) label').textContent = t.country;
+            document.querySelector('#signupForm .checkbox label').innerHTML = t.terms;
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            document.getElementById('themeIcon').className = newTheme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('preferredTheme', newTheme);
+        }
+
+        function loadPreferences() {
+            const theme = localStorage.getItem('preferredTheme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('themeIcon').className = theme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            const lang = localStorage.getItem('preferredLang') || 'sw';
+            currentLang = lang;
+            document.getElementById('langIcon').textContent = lang === 'sw' ? '🇬🇧' : '🇹🇿';
+            updateTranslations();
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        document.getElementById('langToggle').addEventListener('click', toggleLanguage);
+
+        // ============================================
+        // PASSWORD VISIBILITY
+        // ============================================
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const wrapper = input.closest('.password-wrapper');
+            const btn = wrapper.querySelector('.toggle-password');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+
+        // ============================================
+        // PASSWORD STRENGTH
+        // ============================================
+        document.getElementById('signupPassword').addEventListener('input', function() {
+            const password = this.value;
+            const bar = document.getElementById('passwordBar');
+            const text = document.getElementById('passwordStrengthText');
+            const t = translations[currentLang];
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            const percentage = (strength / 5) * 100;
+            bar.style.width = percentage + '%';
+            
+            if (strength <= 2) {
+                bar.className = 'bar weak';
+                text.textContent = t.password_weak;
+            } else if (strength === 3) {
+                bar.className = 'bar medium';
+                text.textContent = t.password_medium;
+            } else if (strength === 4) {
+                bar.className = 'bar strong';
+                text.textContent = t.password_strong;
+            } else {
+                bar.className = 'bar very-strong';
+                text.textContent = t.password_very_strong;
+            }
+        });
+
+        // ============================================
+        // TOAST SYSTEM
+        // ============================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon"><i class="fas ${icons[type] || icons.info}"></i></span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close"><i class="fas fa-times"></i></button>
+            `;
+            toast.querySelector('.toast-close').addEventListener('click', () => toast.remove());
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        // ============================================
+        // AUTH SYSTEM
+        // ============================================
+        function showAuth() {
+            document.getElementById('authOverlay').classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideAuth() {
+            document.getElementById('authOverlay').classList.remove('visible');
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('.auth-tabs button').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.auth-tabs button').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const target = tab.dataset.tab;
+                document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+                document.getElementById(target + 'Form').classList.add('active');
+                document.getElementById('loginError').textContent = '';
+                document.getElementById('signupError').textContent = '';
+                document.getElementById('signupSuccess').textContent = '';
+            });
+        });
+
+        document.getElementById('authCloseBtn').addEventListener('click', hideAuth);
+        document.getElementById('authOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) hideAuth();
+        });
+
+        // ============================================
+        // LOGIN
+        // ============================================
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorEl = document.getElementById('loginError');
+
+            if (!email || !password) {
+                errorEl.textContent = 'Tafadhali jaza sehemu zote.';
+                return;
+            }
+
+            try {
+                const response = await fetch(API_BASE + '/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    hideAuth();
+                    updateUIForLoggedInUser();
+                    showToast('Welcome back, ' + (currentUser.displayName || 'User') + '!', 'success');
+                    // Redirect to home/dashboard
+                    window.location.href = '/home.html';
+                } else {
+                    errorEl.textContent = data.error || 'Login failed. Please check your credentials.';
+                }
+            } catch (error) {
+                errorEl.textContent = 'Login failed. Please try again.';
+            }
+        });
+
+        // ============================================
+        // SIGNUP
+        // ============================================
+        document.getElementById('signupBtn').addEventListener('click', async () => {
+            const username = document.getElementById('signupUsername').value.trim();
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            const dob = document.getElementById('signupDob').value;
+            const country = document.getElementById('signupCountry').value;
+            const terms = document.getElementById('termsCheck').checked;
+            const errorEl = document.getElementById('signupError');
+            const successEl = document.getElementById('signupSuccess');
+
+            if (!username || !name || !email || !password || !confirmPassword) {
+                errorEl.textContent = 'Tafadhali jaza sehemu zote muhimu (*).';
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+                errorEl.textContent = 'Username lazima iwe na herufi 3-20 na herufi/namba tu.';
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                errorEl.textContent = 'Tafadhali ingiza barua pepe sahihi.';
+                return;
+            }
+
+            if (password.length < 8) {
+                errorEl.textContent = 'Nenosiri lazima iwe na angalau herufi 8.';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorEl.textContent = 'Nenosiri na uthibitisho hazifanani.';
+                return;
+            }
+
+            if (!terms) {
+                errorEl.textContent = 'Tafadhali kubali Terms of Service na Privacy Policy.';
+                return;
+            }
+
+            try {
+                const response = await fetch(API_BASE + '/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        displayName: name,
+                        email,
+                        password,
+                        dob,
+                        country,
+                        role: 'user'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successEl.textContent = 'Account created successfully! Please login.';
+                    errorEl.textContent = '';
+                    document.querySelector('.auth-tabs button[data-tab="login"]').click();
+                    document.getElementById('loginEmail').value = email;
+                    document.getElementById('loginPassword').value = '';
+                } else {
+                    errorEl.textContent = data.error || 'Registration failed. Please try again.';
+                }
+            } catch (error) {
+                errorEl.textContent = 'Registration failed. Please try again.';
+            }
+        });
+
+        // ============================================
+        // NAVIGATION AUTH BUTTONS
+        // ============================================
+        document.getElementById('loginNavBtn').addEventListener('click', () => {
+            document.querySelector('.auth-tabs button[data-tab="login"]').click();
+            showAuth();
+        });
+
+        document.getElementById('registerNavBtn').addEventListener('click', () => {
+            document.querySelector('.auth-tabs button[data-tab="signup"]').click();
+            showAuth();
+        });
+
+        document.getElementById('logoutNavBtn').addEventListener('click', () => {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            updateUIForLoggedOutUser();
+            showToast('Logged out successfully', 'info');
+        });
+
+        // ============================================
+        // UI UPDATE
+        // ============================================
+        function updateUIForLoggedInUser() {
+            document.getElementById('navUserActions').style.display = 'none';
+            document.getElementById('navUserLogged').style.display = 'flex';
+            document.getElementById('userDisplayName').textContent = currentUser?.displayName || 'User';
+            document.getElementById('userAvatarNav').textContent = (currentUser?.displayName || 'U')[0].toUpperCase();
+            document.querySelector('.hero-actions .btn-primary').textContent = '💬 Go to Dashboard';
+        }
+
+        function updateUIForLoggedOutUser() {
+            document.getElementById('navUserActions').style.display = 'flex';
+            document.getElementById('navUserLogged').style.display = 'none';
+            document.querySelector('.hero-actions .btn-primary').innerHTML = '<i class="fas fa-rocket"></i> <span data-i18n="get_started">Anza Sasa</span>';
+        }
+
+        function checkAuthState() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('currentUser');
+            if (token && user) {
+                authToken = token;
+                currentUser = JSON.parse(user);
+                updateUIForLoggedInUser();
+                return true;
+            }
+            updateUIForLoggedOutUser();
+            return false;
+        }
+
+        // ============================================
+        // LOADING & NAVIGATION
+        // ============================================
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+            }, 600);
+            loadPreferences();
+            checkAuthState();
+        });
+
+        // Navigation scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('navLinks').classList.toggle('open');
+        });
+
+        // Close mobile menu on link click
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('open');
+            });
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Hero buttons
+        document.getElementById('heroGetStarted').addEventListener('click', () => {
+            if (checkAuthState()) {
+                window.location.href = '/home.html';
+            } else {
+                document.querySelector('.auth-tabs button[data-tab="signup"]').click();
+                showAuth();
+            }
+        });
+
+        document.getElementById('heroLearnMore').addEventListener('click', () => {
+            document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // ============================================
+        // EXPOSE FUNCTIONS
+        // ============================================
+        window.togglePasswordVisibility = togglePasswordVisibility;
+        window.toggleTheme = toggleTheme;
+        window.toggleLanguage = toggleLanguage;
+        window.showToast = showToast;
+        window.showAuth = showAuth;
+        window.hideAuth = hideAuth;
+
+        console.log('🚀 Solo Chat - Landing Page Loaded');
+        console.log('💬 Meet people. Start conversations. Stay connected.');
+    </script>
+</body>
+  </html>
